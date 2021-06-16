@@ -86,11 +86,12 @@ function Login() {
     e.preventDefault();
   }
 
-
+  console.log(user.isSignedIn)
 
   return (
     <div style={{textAlign: 'center'}}>
-      { user.isSignedIn ? <button onClick={signOut}>Sign Out</button> :
+      {
+        user.isSignedIn ? <button onClick={signOut}>Sign Out</button> :
         <button onClick={googleSignIn}>Sign In</button>
       }
       <br/>

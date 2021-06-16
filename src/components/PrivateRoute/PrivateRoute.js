@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext } from 'react'; 
 import { UserContext } from '../../App';
 
 const PrivateRoute = ({children, ...rest}) => {
@@ -9,7 +9,7 @@ const PrivateRoute = ({children, ...rest}) => {
         <Route
       {...rest}
       render={({ location }) =>
-        loggedInUser.email ? (
+        (loggedInUser.email || sessionStorage.getItem('token')) ? (
           children
         ) : (
           <Redirect

@@ -1,51 +1,73 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import './Shipment.css';
 import { useContext } from 'react';
 import { UserContext } from '../../App';
 import { getDatabaseCart, processOrder } from '../../utilities/databaseManager';
+import ProcessPayment from '../ProcessPayment/ProcessPayment';
 
 const Shipment = () => {
   const { register, handleSubmit, watch, errors } = useForm();
   const [loggedInUser, setLoggedInUser] = useContext(UserContext);
-  const onSubmit = data => {
-      console.log("submitted", data)
-      const savedCart = getDatabaseCart();
-      const orderDetails = {...loggedInUser, products: savedCart, shipment: data, orderTime: new Date()};
-      fetch(`https://warm-bayou-02369.herokuapp.com/addOrder`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderDetails)
-      })
+  const [shippingData, setShippingData] = useState(null)
+
+  const handlePaymentSuccess = (paymentId) => {
+    console.log("submitted", shippingData)
+    const savedCart = getDatabaseCart();
+    const orderDetails = { ...loggedInUser, 
+      products: savedCart, 
+      shipment: shippingData,
+      paymentId,
+      orderTime: new Date() };
+    fetch(`https://warm-bayou-02369.herokuapp.com/addOrder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderDetails)
+    })
       .then(res => res.json())
       .then(data => {
-        if(data){
+          if (data) {
           processOrder();
           alert('Successfully Order Done..')
+        }else{
+          alert('Something Went Wrong, Try again')
         }
       })
+  }
+
+  const onSubmit = data => {
+      setShippingData(data)
     };
 
   console.log(watch("example")); // watch input value by passing the name of it
 
   return (
-    <form className="ship-form" onSubmit={handleSubmit(onSubmit)}>
-      <input name="name" defaultValue={loggedInUser.name} ref={register({ required: true })} placeholder="Your Name" />
-      {errors.name && <span className="error">Name is required</span>}
-     
-      <input name="email" defaultValue={loggedInUser.email} ref={register({ required: true })}  placeholder="Your Email"/>
-      {errors.email && <span className="error">Email is required</span>}
-     
-      <input name="address" ref={register({ required: true })}  placeholder="Your Address" />
-      {errors.address && <span className="error">Address is required</span>}
-     
-      <input name="phone" ref={register({ required: true })}  placeholder="Your Phone Number"/>
-      {errors.phone && <span className="error">Phone Number is required</span>}
-      
-      <input type="submit" />
-    </form>
+    <div className="row">
+      <div style= {{display: shippingData ? 'none' : 'block'}} className="col-md-6 m-3">
+        <form className="ship-form" onSubmit={handleSubmit(onSubmit)}>
+          <input name="name" defaultValue={loggedInUser.name} ref={register({ required: true })} placeholder="Your Name" />
+          {errors.name && <span className="error">Name is required</span>}
+
+          <input name="email" defaultValue={loggedInUser.email} ref={register({ required: true })} placeholder="Your Email" />
+          {errors.email && <span className="error">Email is required</span>}
+
+          <input name="address" ref={register({ required: true })} placeholder="Your Address" />
+          {errors.address && <span className="error">Address is required</span>}
+
+          <input name="phone" ref={register({ required: true })} placeholder="Your Phone Number" />
+          {errors.phone && <span className="error">Phone Number is required</span>}
+
+          <input type="submit" />
+        </form>
+      </div>
+      <div style={{ display: shippingData ? 'block' : 'none' }} className="col-md-4 m-5 p-5 payment-area rounded">
+        <h4>Payment Area:</h4>
+        <br></br>
+        <ProcessPayment handlePayment={handlePaymentSuccess}></ProcessPayment>
+      </div>
+    </div>
   );
 };
 

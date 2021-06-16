@@ -12,14 +12,13 @@ const Shop = () => {
     // const [products, setProducts] = useState(first10);
     const [products, setProducts] = useState([]);
     const [cart, setCart] = useState([]);
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
-        fetch(`https://warm-bayou-02369.herokuapp.com/products`)
+        fetch('https://warm-bayou-02369.herokuapp.com/products?search='+search)
         .then(res => res.json())
         .then(data => setProducts(data))
-    }, [])
-
-
+    }, [search])
 
     
     useEffect(()=>{
@@ -48,6 +47,10 @@ const Shop = () => {
         // }
     }, [])
 
+    const handleSearch = event => {
+        setSearch(event.target.value)
+    }
+
     const handleAddProduct = (product) =>{
         const toBeAddedKey = product.key;
         const sameProduct = cart.find(pd => pd.key === toBeAddedKey);
@@ -70,13 +73,16 @@ const Shop = () => {
     return (
         <div className="twin-container">
             <div className="product-container">
+                <div class="m-3 input-group rounded">
+                    <input onBlur={handleSearch} type="search" placeholder="Search" aria-label="Search"
+                        aria-describedby="search-addon" />
+                </div>
                 {
-                    products.map(pd => <Product 
-                        key={pd.key}
-                        showAddToCart={true}
-                        handleAddProduct = {handleAddProduct}
-                        product={pd}
-                        ></Product>)
+                  products.map(pd => <Product 
+                    key={pd.key}
+                    showAddToCart={true}
+                    handleAddProduct = {handleAddProduct}
+                    product={pd}></Product>)
                 }
             </div>
             <div className="cart-container">
